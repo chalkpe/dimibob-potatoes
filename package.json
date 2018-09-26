@@ -1,0 +1,16 @@
+{
+  "name": "dimibob-crawler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ChalkPE/dimibob-crawler",
+  "author": "Chalk <chalk@chalk.pe>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2"
+  },
+  "devDependencies": {
+    "standard": "^12.0.1"
+  }
+}
