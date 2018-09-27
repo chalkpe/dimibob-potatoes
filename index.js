@@ -8,6 +8,7 @@ const FILTER = article => /^(\d+)월.*?(\d+)일.*?식단.*$/.test(article.title)
 const MEALS = { '조식': 'breakfast', '중식': 'lunch', '석식': 'dinner', '간식': 'snack' }
 
 let potatoes = {}
+const CACHE = './cache'
 const WORDS = ['감자', '포테이토', '포테토']
 
 async function fetchArticles () {
@@ -33,7 +34,7 @@ async function fetchArticles () {
 }
 
 function cache (href) {
-  const path = `./cache/${url.parse(href, true).query.document_srl}.html`
+  const path = `${CACHE}/${url.parse(href, true).query.document_srl}.html`
 
   if (fs.existsSync(path)) return fs.readFileSync(path, 'utf8')
   else return axios.get(href).then(({ data }) => save(data, path))
@@ -67,14 +68,15 @@ async function parseArticle (article) {
 }
 
 function savePotatoes () {
-  fs.writeFileSync('data.txt', [...Object.entries(potatoes)]
+  fs.writeFileSync('potatoes.txt', [...Object.entries(potatoes)]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(v => `[${v[1].toString().padStart(2, '0')}] ${v[0]}`)
     .join('\n'))
 }
 
+fs.existsSync(CACHE) || fs.mkdirSync(CACHE)
 fetchArticles()
-  .then(v => save(v, 'data.json'))
+  .then(v => save(v, 'dimibob.json'))
   .then(v => v.filter(FILTER))
   .then(v => Promise.all(v.map(parseArticle)))
   .then(savePotatoes)
