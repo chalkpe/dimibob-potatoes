@@ -17,25 +17,31 @@ async function fetchArticles () {
   while (true) {
     const $ = cheerio.load((await axios.get(URL, { params })).data)
 
-    const map = $('#dimigo_post_cell_2 tr').map((i, e) => ({
+    const list = $('#dimigo_post_cell_2 tr').map((i, e) => ({
       title: $(e).find('td.title').text().trim(),
       date: $(e).find('td.regdate').text().trim(),
       href: $(e).find('td.title a').attr('href')
-    }))
+    })).get()
 
     const next = $('a.direction.next').attr('href')
     const page = parseInt(url.parse(next, true).query.page)
 
-    articles.push(...map.get())
+    articles.push(...list)
+    console.log('page', params.page, list)
     if (params.page++ >= page) return articles
   }
 }
 
 function cache (href) {
-  const p = `./cache/${url.parse(href, true).query.document_srl}.html`
+  const path = `./cache/${url.parse(href, true).query.document_srl}.html`
 
-  if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8')
-  else return axios.get(href).then(({ data: v }) => [fs.writeFileSync(p, v), v][1])
+  if (fs.existsSync(path)) return fs.readFileSync(path, 'utf8')
+  else return axios.get(href).then(({ data }) => save(data, path))
+}
+
+function save (value, path) {
+  fs.writeFileSync(path, typeof value === 'string' ? value : JSON.stringify(value, null, 2))
+  return value
 }
 
 async function parseArticle (article) {
@@ -68,7 +74,7 @@ function savePotatoes () {
 }
 
 fetchArticles()
-  .then(v => [v, fs.writeFileSync('data.json', JSON.stringify(v, null, 2))][0])
+  .then(v => save(v, 'data.json'))
   .then(v => v.filter(FILTER))
   .then(v => Promise.all(v.map(parseArticle)))
   .then(savePotatoes)
