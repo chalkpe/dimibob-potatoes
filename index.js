@@ -8,7 +8,7 @@ const FILTER = article => /^(\d+)월.*?(\d+)일.*?식단.*$/.test(article.title)
 const MEALS = { '조식': 'breakfast', '중식': 'lunch', '석식': 'dinner', '간식': 'snack' }
 
 let potatoes = {}
-const WORDS = ['감자', '포테이토']
+const WORDS = ['감자', '포테이토', '포테토']
 
 async function fetchArticles () {
   const articles = []
