@@ -8,6 +8,7 @@ const FILTER = article => /^(\d+)월.*?(\d+)일.*?식단.*$/.test(article.title)
 const MEALS = { '조식': 'breakfast', '중식': 'lunch', '석식': 'dinner', '간식': 'snack' }
 
 let potatoes = {}
+const WORDS = ['감자', '포테이토']
 
 async function fetchArticles () {
   const articles = []
@@ -31,15 +32,16 @@ async function fetchArticles () {
 }
 
 function cache (href) {
-  const i = './cache/' + url.parse(href, true).query.document_srl
-  if (fs.existsSync(i)) return fs.readFileSync(i, 'utf8')
-  else return axios.get(href).then(({ data }) => [fs.writeFileSync(i, data), data][1])
+  const p = `./cache/${url.parse(href, true).query.document_srl}.html`
+
+  if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8')
+  else return axios.get(href).then(({ data: v }) => [fs.writeFileSync(p, v), v][1])
 }
 
 async function parseArticle (article) {
   try {
     const html = await cache(article.href)
-    if (!html.includes('감자')) return
+    if (WORDS.every(w => !html.includes(w))) return
 
     const $ = cheerio.load(html)
     const map = $('div.xe_content p').map((i, e) => {
@@ -48,23 +50,25 @@ async function parseArticle (article) {
     })
 
     map.get().forEach(v => {
-      if (!v || !v.includes('감자')) return
+      if (!v || WORDS.every(w => !v.includes(w))) return
+
       potatoes[v] = potatoes[v] || 0
       potatoes[v] += 1
     })
-  } catch (_) {
-    console.log('parse failed:', article.href)
+  } catch (e) {
+    console.log('parse failed:', article.href, e.message)
   }
 }
 
 function savePotatoes () {
   fs.writeFileSync('data.txt', [...Object.entries(potatoes)]
-    .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
-    .map(v => v.join(': '))
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(v => `[${v[1].toString().padStart(2, '0')}] ${v[0]}`)
     .join('\n'))
 }
 
 fetchArticles()
+  .then(v => [v, fs.writeFileSync('data.json', JSON.stringify(v, null, 2))][0])
   .then(v => v.filter(FILTER))
   .then(v => Promise.all(v.map(parseArticle)))
   .then(savePotatoes)
