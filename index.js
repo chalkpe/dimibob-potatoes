@@ -3,11 +3,11 @@ const url = require('url')
 const axios = require('axios')
 const cheerio = require('cheerio')
 
-const potato = {}
-
 const URL = 'https://www.dimigo.hs.kr/index.php'
-const PATTERN = /^(\d+)월.*?(\d+)일.*?식단.*$/
+const FILTER = article => /^(\d+)월.*?(\d+)일.*?식단.*$/.test(article.title)
 const MEALS = { '조식': 'breakfast', '중식': 'lunch', '석식': 'dinner', '간식': 'snack' }
+
+let potatoes = {}
 
 async function fetchArticles () {
   const articles = []
@@ -48,22 +48,24 @@ async function parseArticle (article) {
     })
 
     map.get().forEach(v => {
-      if (!v.includes('감자')) return
-      potato[v] = potato[v] || 0
-      potato[v] += 1
+      if (!v || !v.includes('감자')) return
+      potatoes[v] = potatoes[v] || 0
+      potatoes[v] += 1
     })
-  } catch (_) { console.log(article.href) }
+  } catch (_) {
+    console.log('parse failed:', article.href)
+  }
 }
 
-function formatPotatoes () {
-  return [...Object.entries(potato)]
+function savePotatoes () {
+  fs.writeFileSync('data.txt', [...Object.entries(potatoes)]
     .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
     .map(v => v.join(': '))
-    .join('\n')
+    .join('\n'))
 }
 
 fetchArticles()
-  .then(v => v.filter(i => PATTERN.test(i.title)))
+  .then(v => v.filter(FILTER))
   .then(v => Promise.all(v.map(parseArticle)))
-  .then(() => fs.writeFileSync('data.txt', formatPotatoes()))
-  .catch(e => console.error(e))
+  .then(savePotatoes)
+  .catch(console.error)
