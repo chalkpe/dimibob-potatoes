@@ -1,6 +1,5 @@
 cache
-dimibob.json
-potatoes.txt
+result.txt
 
 node_modules
 .vscode

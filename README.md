@@ -4,7 +4,7 @@
 ## 사용법
 ```bash
 $ git clone https://github.com/ChalkPE/dimibob-potatoes
-$ cd dimibob-potatoes && yarn && node . && cat data.txt
+$ cd dimibob-potatoes && yarn && node . && cat result.txt
 ```
 
 ## 라이선스
