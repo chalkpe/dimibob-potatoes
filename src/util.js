@@ -7,7 +7,7 @@ const progress = require('progress')
 const query = (str, name) =>
   url.parse(str, true).query[name]
 
-const prepare = () => fs.mkdirSync('./cache')
+const prepare = () => fs.existsSync('./cache') || fs.mkdirSync('./cache')
 
 function fetch (href, ident) {
   const path = `./cache/${query(href, ident)}.html`
