@@ -8,7 +8,7 @@ $ cd dimibob-potatoes && yarn && yarn start && cat result.txt
 ```
 
 ## 스크린샷
-![screenshot](screenshot.png)
+![screenshot](screenshot.gif)
 
 ## 라이선스
 [MIT](LICENSE) 라이선스입니다!
