@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>감자</title>
+    <title>dimibob-potatoes result page</title>
+    <style>html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }</style>
   </head>
   <body>
     <div id="chart"></div>
@@ -13,25 +14,55 @@
       const pattern = /^\[(\d+)\] (.*)$/gm
       const el = document.querySelector("#chart")
 
-      function parse(text, m) {
+      function parse (text) {
+        let m = null
+        let others = 0
+        console.log(text)
+
         const options = {
-          labels: [],
+          chart: { type: 'donut', height: '100%' },
+
+          responsive: { breakpoint: 600 },
+          theme: {
+            monochrome: {
+              enabled: true,
+              color: '#fcde92',
+              shadeTo: 'dark',
+              shadeIntensity: 0.7
+            }
+          },
+
+          plotOptions: { pie: { donut: { labels: {
+            show: true,
+            total: { show: true, label: '합계' }
+          } } } },
+
           series: [],
-          chart: { width: 1000, type: 'donut' }
+          labels: [],
         }
 
         while ((m = pattern.exec(text)) !== null) {
-          options.series.push(parseInt(m[1], 10))
-          options.labels.push(m[2])
+          const name = m[2]
+          const quantity = parseInt(m[1], 10)
+
+          if (quantity <= 3) {
+            others += quantity
+            continue
+          }
+
+          options.labels.push(name)
+          options.series.push(quantity)
         }
 
+        options.labels.push('기타')
+        options.series.push(others)
         return options
       }
 
       fetch('result.txt')
         .then(res => res.text())
         .then(text => new ApexCharts(el, parse(text)).render())
-        .catch(err => alert(err.message || 'FATAL ERROR'))
+        .catch(err => document.write(err.message) || console.error(err))
     </script>
   </body>
 </html>

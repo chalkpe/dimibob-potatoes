@@ -1,6 +1,8 @@
 const fs = require('fs')
 const url = require('url')
 const path = require('path')
+
+const opn = require('opn')
 const axios = require('axios')
 const progress = require('progress')
 
@@ -29,12 +31,13 @@ function save (found) {
     .join('\n')
 
   fs.writeFileSync('result.txt', out)
-  console.log(`found ${keys} unique menu: total ${count} times occured`)
-  console.log(`saved ${process.cwd()}${path.sep}result.txt`)
+  console.log(`found ${keys} unique menu: total ${count} times appeared`)
+  console.log(`saved ${path.join(process.cwd(), 'result.txt')}`)
+
+  return opn('index.html')
 }
 
 const bar = (fmt, total, curr) =>
   new progress(fmt + ' [:bar] :current/:total', {total, complete: '=', incomplete: ' ', width: 50, curr})
-
 
 module.exports = {query, fetch, bar, save, prepare}

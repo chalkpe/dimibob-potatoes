@@ -16,7 +16,7 @@ async function main () {
     progress.tick({ title: article.title })
   }
 
-  util.save(found)
+  await util.save(found)
 }
 
 main().catch(console.error)
