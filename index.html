@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>감자</title>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+      const pattern = /^\[(\d+)\] (.*)$/gm
+      const el = document.querySelector("#chart")
+
+      function parse(text, m) {
+        const options = {
+          labels: [],
+          series: [],
+          chart: { width: 1000, type: 'donut' }
+        }
+
+        while ((m = pattern.exec(text)) !== null) {
+          options.series.push(parseInt(m[1], 10))
+          options.labels.push(m[2])
+        }
+
+        return options
+      }
+
+      fetch('result.txt')
+        .then(res => res.text())
+        .then(text => new ApexCharts(el, parse(text)).render())
+        .catch(err => alert(err.message || 'FATAL ERROR'))
+    </script>
+  </body>
+</html>
